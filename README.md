@@ -103,7 +103,7 @@ Sensitivity : 0.993
 Saving figure: ./output/roc.png
 ```
 
-<img src="./output/roc.png" alt="ROC plot" width="200px">
+<img src="./output/roc.png" alt="ROC plot" width="300px">
 
 # Prediction
 
