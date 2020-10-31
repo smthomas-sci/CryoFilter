@@ -111,7 +111,11 @@ Saving figure: ./output/roc.png
 
 Prediction in the wild is done using `score.py` with an output of a score between
  0-1 for each image, in the order found in the stack. The scores are saved as a
- csv file, saved as `--out_file [*.csv]`. Example usage:
+ csv file, saved as `--out_file [*.csv]`. You can additionally use the --tta argument
+ which will included [test-time augmentation](https://www.nature.com/articles/s41598-020-61808-3),
+ which in this case includes left/right flips and 90, 180, 270 degree rotations of the same image,
+ and then takes the mean prediction. This can boost performance but predicts each images 8x so reuqires
+ more time. Example usage:
  
 ```
 python score.py --mrc ./data/neg.mrcs --out_file ./output/neg_scores.csv --weights ./weights/weights_epoch_99_val_acc_0.981.h5
