@@ -34,6 +34,8 @@ parser.add_argument('--batch_size', type=int, default=64,
                     help='Number of images to train at once - between 12 and 128 is fine')
 parser.add_argument('--img_dim', type=int, default=28,
                     help='The size to resize to e.g. 256x256 -> 28x28. Larger is more computation')
+parser.add_argument('--tta', type=bool, default=False,
+                    help='Whether to use Test-Time Augmentation when evaluating the model')
 args = parser.parse_args()
 
 
@@ -49,6 +51,7 @@ WEIGHTS = args.weights
 OUT_DIR = args.out_dir
 POS_FILES = args.pos
 NEG_FILES = args.neg
+TTA = args.tta
 
 # 1. Setup data
 generator = DataGenerator(pos_files=POS_FILES,
@@ -64,7 +67,7 @@ model = build_model(IMG_DIM)
 model.load_weights(WEIGHTS)
 
 # 3. Get predictions
-y_true, y_pred = get_predictions(model, generator, drop_remainder=False)
+y_true, y_pred = get_predictions(model, generator, drop_remainder=False, tta=TTA)
 
 # 4. Compute metrics
 metrics = compute_metrics(y_true, y_pred)

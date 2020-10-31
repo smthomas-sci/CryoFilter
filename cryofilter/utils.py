@@ -3,6 +3,7 @@ Contains utils for training and validation
 
 Author: Simon Thomas
 Date: 30th October 2020
+Update: 31st October 2020
 
 Requirements (available by pip / conda):
 - tensorflow
@@ -20,12 +21,44 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, roc_auc_score, classification_report
 
 
-def get_predictions(model, generator, drop_remainder=False) -> tuple:
+def flip(images):
+    """
+    Flips image stack left to right
+    :param images: ndarray of images (batch_size, h, w, 3)
+    :return: ndarray of images (batch_size, h, w, 3)
+    """
+    return images[..., ::-1, :]
+
+
+def rot90(images):
+    """
+    Rotates image stack anti-clockwise by 90 degrees
+    :param images: ndarray of images (batch_size, h, w, 3)
+    :return: ndarray of images (batch_size, h, w, 3)
+    """
+    return images.swapaxes(-3, -2)[..., ::-1, :, :]
+
+
+def rotate(images, k: int):
+    """
+    Rotates images stack anti-clockwise by 90 degrees k times.
+    :param images: ndarray of images (batch_size, h, w, 3)
+    :param k: int
+    :return: ndarray of images (batch_size, h, w, 3)
+    """
+    if k == 0:
+        return images
+    else:
+        return rotate(rot90(images), k-1)
+
+
+def get_predictions(model, generator, drop_remainder=False, tta=False) -> tuple:
     """
     Gets predicts from the model using the given generator (validation)
     :param model: the trained model to predict with
     :param generator: the generator to use
     :param drop_remainder: bool, whether to drop remainder of not a complete batch
+    :param tta: bool, indicating whether to perform test-time augmentation
     :return: predictions: y_true, y_pred which are each (n, 1) arrays
     """
     # Save all predicts
@@ -44,8 +77,38 @@ def get_predictions(model, generator, drop_remainder=False) -> tuple:
         # Get batch of data
         x1, x2, y = generator.val[step]
 
-        # Get predicts for input
-        y_pred = model.predict([x1, x2])
+        # Predict using test-time augmentation
+        if tta:
+            scores = np.zeros_like(y)
+
+            for j in range(2):
+
+                # Flip let to right
+                if j == 1:
+                    x1 = flip(x1)
+                    x2 = flip(x2)
+
+                # Rotate 90 degrees
+                for f in range(4):
+                    x1 = rotate(x1, f)
+                    x2 = rotate(x2, f)
+
+                    if len(x1.shape) < 4:
+                        x1 = np.expand_dims(x1, axis=-1)
+                        x2 = np.expand_dims(x2, axis=-1)
+
+                    # predict new features
+                    y_pred = model.predict([x1, x2])
+
+                    # Add to sum
+                    scores += y_pred
+
+            # Average the predictions
+            y_pred = scores / 8
+
+        else:
+            # Get predicts for input
+            y_pred = model.predict([x1, x2])
 
         # Save input/output pairs
         y_preds.append(y_pred)

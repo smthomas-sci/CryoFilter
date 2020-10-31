@@ -60,7 +60,7 @@ Matrix plots in the output directory.
 ```
 usage: metrics.py [-h] [--pos POS [POS ...]] [--neg NEG [NEG ...]]
                   [--weights WEIGHTS] [--out_dir OUT_DIR] [--split SPLIT]
-                  [--batch_size BATCH_SIZE] [--img_dim IMG_DIM]
+                  [--batch_size BATCH_SIZE] [--img_dim IMG_DIM] [--tta TTA]
 
 Evaluate network
 
@@ -70,14 +70,15 @@ optional arguments:
   --neg NEG [NEG ...]   mrcs files belonging to the negative class
   --weights WEIGHTS     Path to the model weights
   --out_dir OUT_DIR     Where to save the ROC plot.
-  --split SPLIT         The split for training : validation. Use 1 for
+  --split SPLIT         The split for training : validation. Use 1. to
                         evaluate the whole dataset
   --batch_size BATCH_SIZE
                         Number of images to train at once - between 12 and 128
                         is fine
   --img_dim IMG_DIM     The size to resize to e.g. 256x256 -> 28x28. Larger is
                         more computation
-
+  --tta TTA             Whether to use Test-Time Augmentation when evaluating
+                        the model
 ```
 
 Usage is:
@@ -92,15 +93,16 @@ The output will be:
 --------------------------
    Performance Summary    
 --------------------------
-Auc : 0.998
+Auc : 0.975
 CM :
-[[280.  15.]
- [  4. 597.]]
-Acc : 0.979
-Specificity : 0.949
-Sensitivity : 0.993
+[[ 846.  136.]
+ [  66. 1984.]]
+Acc : 0.933
+Specificity : 0.862
+Sensitivity : 0.968
 
 Saving figure: ./output/roc.png
+
 ```
 
 <img src="./output/roc.png" alt="ROC plot" width="300px">
