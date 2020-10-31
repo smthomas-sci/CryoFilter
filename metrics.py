@@ -86,5 +86,5 @@ print()
 # 5. Create Plots
 create_roc_plot(metrics, OUT_DIR)
 
-
+generator.close()
 

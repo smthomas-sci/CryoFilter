@@ -83,7 +83,7 @@ optional arguments:
 Usage is:
 
 ```
-python metrics.py --pos ./data/pos.mrcs ./data/pos_top.mrcs --neg ./data/neg.mrcs --out_dir ./output/ --weights ./weights/model_weihts.h5
+python metrics.py --pos ./data/pos.mrcs ./data/pos_top.mrcs --neg ./data/neg.mrcs --out_dir ./output/ --weights ./weights/model_weights.h5
 ```
 
 The output will be:
@@ -107,9 +107,27 @@ Saving figure: ./output/roc.png
 
 # Prediction
 
-Prediction in the wild is done using `score.py [mrcfile]` with an output of a score between
+Prediction in the wild is done using `score.py` with an output of a score between
  0-1 for each image, in the order found in the stack. The scores are saved as a
- csv file, saved as `--out_dir`
+ csv file, saved as `--out_file [*.csv]`. Example usage:
+ 
+```
+python score.py --mrc ./data/neg.mrcs --out_file ./output/neg_scores.csv --weights ./weights/weights_epoch_99_val_acc_0.981.h5
+```
+
+`neg_scores.csv` will look like:
+
+```
+0, 0.032
+1, 0.003
+2, 0.000
+3, 0.002
+4, 0.047
+...
+```
+
+
+ 
  
  
  
