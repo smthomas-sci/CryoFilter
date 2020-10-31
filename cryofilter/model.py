@@ -50,36 +50,3 @@ def build_model(img_dim: int = 28, dropout=False):
                  outputs=[model_output],
                  name="classifier")
 
-if __name__ == "__main__":
-
-    import numpy as np
-    import tensorflow as tf
-
-    physical_devices = tf.config.list_physical_devices('GPU')
-    try:
-        tf.config.experimental.set_memory_growth(physical_devices[0], True)
-    except:
-        # Invalid device or cannot modify virtual devices once initialized.
-        pass
-
-
-    model = build_model(28)
-
-    model.compile(optimizer=tf.keras.optimizers.Adam(lr=0.001),
-                  loss="binary_crossentropy",
-                  metrics=["acc"])
-
-
-    #[print(thing.shape) for thing in model.inputs]
-
-    X = [np.random.random((1, 28, 28, 1)), np.random.random((1, 28, 28, 1))]
-    y = np.ones((1, 1))
-    y_pred = model.predict(X)
-
-    #out = model.train_on_batch(X, y)
-
-    print(y, y_pred)
-
-
-
-

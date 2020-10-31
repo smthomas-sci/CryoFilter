@@ -54,6 +54,7 @@ class DataGenerator:
         :param shuffle: bool for shuffling the stacks
         :param data_augmentation: bool for performing data augmentation (flip & rotate)
         :param split: float between 0-1 (inclusive) for training proportion (val and test are equal)
+                      If split == 1, then train and val generators are the same.
         :param img_dim: int designating the size of the images (img_dim x img_dim)
         """
         self.pos_files = pos_files
@@ -98,8 +99,11 @@ class DataGenerator:
             np.random.shuffle(self.indices)
 
         # Build train and validation generators
-        self.train = _Generator(self.indices[:self.n], self)
-        self.val = _Generator(self.indices[self.n:], self)
+        if self.split < 1:
+            self.train = _Generator(self.indices[:self.n], self)
+            self.val = _Generator(self.indices[self.n:], self)
+        else:
+            self.train = self.val = _Generator(self.indices, self)
 
     def _get_indices(self, i):
         return self.indices[i * self.batch_size:i * self.batch_size + self.batch_size]

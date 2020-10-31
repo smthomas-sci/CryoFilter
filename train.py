@@ -34,6 +34,8 @@ parser.add_argument('--img_dim', type=int, default=28,
                     help='The size to resize to e.g. 256x256 -> 28x28. Larger is more computation')
 parser.add_argument('--learning_rate', type=float, default=0.001,
                     help='Learning rate of network - default is pretty good')
+parser.add_argument('--augmentation', type=bool, default=True,
+                    help='Using data augmentation- default is True')
 parser.add_argument('--history_dir', type=str, default=".",
                     help='Diretory to save history.csv')
 
@@ -54,13 +56,15 @@ WEIGHT_DIR = args.weight_dir
 HISTORY_DIR = args.history_dir
 POS_FILES = args.pos
 NEG_FILES = args.neg
+AUGMENTATION = args.augmentation
 
 # 1. Setup data
 generator = DataGenerator(pos_files=POS_FILES,
                           neg_files=NEG_FILES,
                           batch_size=BATCH_SIZE,
                           split=SPLIT,
-                          img_dim=IMG_DIM
+                          img_dim=IMG_DIM,
+                          data_augmentation=AUGMENTATION
                           )
 
 # 2. Build and prepare model for training

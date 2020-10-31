@@ -11,101 +11,128 @@ Requirements (available by pip / conda):
 - matplotlib
 """
 
-from sklearn.metrics import roc_curve, auc, roc_auc_score
 import os
 
+import tensorflow as tf
+import numpy as np
 import matplotlib.pyplot as plt
 
-import tensorflow as tf
-
-import numpy as np
+from sklearn.metrics import roc_curve, roc_auc_score, classification_report
 
 
-from cryofilter.data import DataGenerator
-from cryofilter.model import build_model
+def get_predictions(model, generator) -> tuple:
+    """
+    Gets predicts from the model using the given generator (validation)
+    :param model: the trained model to predict with
+    :param generator: the generator to use
+    :return: predictions: y_true, y_pred which are each (n, 1) arrays
+    """
+    # Save all predicts
+    y_preds = []
+    y_trues = []
 
-# # --------------------- DEBUG -------------------------------------- #
-physical_devices = tf.config.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
-# # ----------------------------------------------------------------- #
+    N = generator.val.n // generator.batch_size
 
+    progress = tf.keras.utils.Progbar(N)
 
+    for step in range(N):
+        progress.update(step)
 
-# 1. Setup data
-generator = DataGenerator(pos_files=["../data/pos.mrcs", "../data/pos_top.mrcs"],
-                          neg_files=["../data/neg.mrcs"],
-                          batch_size=32,
-                          split=0.7,
-                          img_dim=28
-                          )
+        # Get batch of data
+        x1, x2, y = generator.val[step]
 
-model = build_model(28)
+        # Get predicts for input
+        y_pred = model.predict([x1, x2])
 
-model.load_weights("../weights/weights_epoch_99_val_acc_0.981.h5")
+        # Save input/output pairs
+        y_preds.append(y_pred)
+        y_trues.append(y)
 
-model.summary()
+    # Finalize
+    progress.update(step+1, finalize=True)
 
-y_preds = []
-y_trues = []
+    # Convert to a stack: shape == (N*batch_sie, 1)
+    y_pred = np.vstack(y_preds)
+    y_true = np.vstack(y_trues)
 
-N = generator.val.n // generator.batch_size
-
-counts = 0
-total = 0
-for step in range(N):
-    print(step, "of", N, end="\r")
-
-    x1, x2, y = generator.val[step]
-
-    counts += np.sum(y)
-
-    total += 32
-
-    y_pred = model.predict([x1, x2])
-
-    y_preds.append(y_pred)
-    y_trues.append(y)
-
-y_preds = np.vstack(y_preds)
-y_trues = np.vstack(y_trues)
+    return y_true, y_pred
 
 
-# calculate scores
-ns_auc = roc_auc_score(y_trues, [0.5]*y_preds.shape[0])
-lr_auc = roc_auc_score(y_trues, y_preds)
+def compute_metrics(y_true, y_pred):
+    """
+    :param y_true: numpy array of true values
+    :param y_pred: numpy array of predicted values
+    :return:
+    """
+    metrics = {}
+    n = y_pred.shape[0]
 
-print("AUC:", lr_auc)
+    # Calculate AUC
+    train_auc = roc_auc_score(y_true, y_pred)
 
-print("positives", counts)
-print("Total:", total)
+    metrics["AUC"] = train_auc
 
-print(y_trues.shape, y_preds.shape)
-#
+    # Calculate roc curves
+    base_fpr, base_tpr, _ = roc_curve(y_true, [0.5]*n)
+    train_fpr, train_tpr, _ = roc_curve(y_true, y_pred)
 
-# calculate roc curves
-ns_fpr, ns_tpr, _ = roc_curve(y_trues, [0.5]*y_preds.shape[0])
-lr_fpr, lr_tpr, _ = roc_curve(y_trues, y_preds)
+    metrics["ROC"] = {
+        "base_fpr": base_fpr,
+        "base_tpr": base_tpr,
+        "train_fpr": train_fpr,
+        "train_tpr": train_tpr
+    }
 
-# plot the roc curve for the model
-plt.figure(figsize=(5,5), dpi= 200)
-plt.plot(ns_fpr, ns_tpr, linestyle='--', label='No Skill')
-plt.plot(lr_fpr, lr_tpr, marker='.', label='Logistic')
-#
-# axis labels
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-#
-# show the plot
-plt.title('Logistic: ROC AUC=%.3f' % (lr_auc), fontweight='bold')
-plt.xlim([0,1])
-plt.ylim([0,1])
-plt.grid()
+    # Calculate confusion matrix with threshold 0.5
+    confusion = np.zeros((2, 2))
+    for t,p in zip(y_true, y_pred):
+        confusion[int(t), int(p > 0.5)] += 1
 
-plt.savefig("./AUC_curve.png")
+    metrics["CM"] = confusion
+    metrics["acc"] = np.sum(y_true == (y_pred > 0.5)) / n
+    metrics["specificity"] = confusion[0, 0] / np.sum(confusion[0, :])
+    metrics["sensitivity"] = confusion[1, 1] / np.sum(confusion[1, :])
 
-plt.close()
+    return metrics
 
-#plt.show()
-#
-#
-#
+
+def create_roc_plot(metrics, out_dir: str):
+    """
+    :param metrics: dictionary from the `compute_metrics()` function
+    :param out_dir: the directory to save the curve
+    :return: None
+    """
+    auc = metrics["AUC"]
+    base_fpr = metrics["ROC"]["base_fpr"]
+    base_tpr = metrics["ROC"]["base_tpr"]
+    train_fpr = metrics["ROC"]["train_fpr"]
+    train_tpr = metrics["ROC"]["train_tpr"]
+
+    # Plot the roc curve for the model
+    plt.figure(figsize=(5, 5), dpi=200)
+    plt.plot(base_fpr, base_tpr, linestyle='--', label='Reference')
+    plt.plot(train_fpr, train_tpr, marker='.', label='Model')
+
+    # Axis labels
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+
+    # Show the plot
+    plt.title(f'ROC AUC={auc:.3f}', fontweight='bold')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.grid()
+
+    # Save
+    filename = os.path.join(out_dir, "roc.png")
+    print("Saving figure:", filename)
+    plt.savefig(filename)
+
+    plt.close()
+
+    return None
+
+
+
+
+
