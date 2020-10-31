@@ -27,7 +27,7 @@ parser.add_argument('--weight_dir', type=str,
 parser.add_argument('--batch_size', type=int, default=64,
                     help='Number of images to train at once - between 12 and 128 is fine')
 parser.add_argument('--split', type=float, default=0.7,
-                    help='Train : Validation split - (1-split) will be shared for between validation, test', )
+                    help='Train : Validation split')
 parser.add_argument('--epochs', type=int, default=100,
                     help='Number of times to train on the whole dataset')
 parser.add_argument('--img_dim', type=int, default=28,
