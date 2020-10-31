@@ -152,7 +152,7 @@ class DataGenerator:
         # Prepare as batch
         batch_img = self.normalise(np.stack(batch_img))
         batch_rob = self.normalise(np.stack(batch_rob))
-        batch_label = np.stack(batch_label).reshape(self.batch_size, 1)
+        batch_label = np.stack(batch_label).reshape(len(batch_label), 1)
 
         # Convert to tensors
         # batch_img = tf.convert_to_tensor(batch_img)

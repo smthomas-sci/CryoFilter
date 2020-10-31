@@ -59,7 +59,7 @@ model = build_model(IMG_DIM)
 model.load_weights(WEIGHTS)
 
 # 3. Get predictions
-y_true, y_pred = get_predictions(model, generator)
+y_true, y_pred = get_predictions(model, generator, drop_remainder=False)
 
 # 4. Save Scores
 with open(OUT_FILE, "w") as f:

@@ -29,7 +29,7 @@ parser.add_argument('--weights', type=str,
 parser.add_argument('--out_dir', type=str,
                     help='Where to save the ROC plot.')
 parser.add_argument('--split', type=float, default=0.7,
-                    help='The split for training : validation. Use 1 for evaluate the whole dataset')
+                    help='The split for training : validation. Use 1. to evaluate the whole dataset')
 parser.add_argument('--batch_size', type=int, default=64,
                     help='Number of images to train at once - between 12 and 128 is fine')
 parser.add_argument('--img_dim', type=int, default=28,
@@ -64,7 +64,7 @@ model = build_model(IMG_DIM)
 model.load_weights(WEIGHTS)
 
 # 3. Get predictions
-y_true, y_pred = get_predictions(model, generator)
+y_true, y_pred = get_predictions(model, generator, drop_remainder=False)
 
 # 4. Compute metrics
 metrics = compute_metrics(y_true, y_pred)

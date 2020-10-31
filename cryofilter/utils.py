@@ -20,11 +20,12 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, roc_auc_score, classification_report
 
 
-def get_predictions(model, generator) -> tuple:
+def get_predictions(model, generator, drop_remainder=False) -> tuple:
     """
     Gets predicts from the model using the given generator (validation)
     :param model: the trained model to predict with
     :param generator: the generator to use
+    :param drop_remainder: bool, whether to drop remainder of not a complete batch
     :return: predictions: y_true, y_pred which are each (n, 1) arrays
     """
     # Save all predicts
@@ -32,6 +33,8 @@ def get_predictions(model, generator) -> tuple:
     y_trues = []
 
     N = generator.val.n // generator.batch_size
+    if not drop_remainder:
+        N += 1
 
     progress = tf.keras.utils.Progbar(N)
 

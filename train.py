@@ -77,8 +77,8 @@ model.compile(optimizer=tf.keras.optimizers.Adam(lr=LEARNING_RATE),
               metrics=[Acc])
 
 # 3. Train model
-steps_per_epoch = generator.train.n // generator.batch_size
-validation_steps = generator.val.n // generator.batch_size
+steps_per_epoch = (generator.train.n // generator.batch_size) + 1
+validation_steps = (generator.val.n // generator.batch_size) + 1
 
 history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
 
