@@ -30,12 +30,14 @@ parser.add_argument('--batch_size', type=int, default=64,
                     help='Number of images to train at once - between 12 and 128 is fine')
 parser.add_argument('--img_dim', type=int, default=28,
                     help='The size to resize to e.g. 256x256 -> 28x28. Larger is more computation')
+parser.add_argument('--tta', type=bool, default=False,
+                    help='Whether to use Test-Time Augmentation when evaluating the model')
 args = parser.parse_args()
 
 
 # # --------------------- DEBUG -------------------------------------- #
-physical_devices = tf.config.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# physical_devices = tf.config.list_physical_devices('GPU')
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 # # ----------------------------------------------------------------- #
 
 IMG_DIM = args.img_dim
@@ -43,6 +45,7 @@ BATCH_SIZE = args.batch_size
 WEIGHTS = args.weights
 OUT_FILE = args.out_file
 MRC_FILE = args.mrc
+TTA = args.tta
 
 # 1. Setup data
 generator = DataGenerator(pos_files=[MRC_FILE],
@@ -59,7 +62,7 @@ model = build_model(IMG_DIM)
 model.load_weights(WEIGHTS)
 
 # 3. Get predictions
-y_true, y_pred = get_predictions(model, generator, drop_remainder=False)
+y_true, y_pred = get_predictions(model, generator, drop_remainder=False, tta=TTA)
 
 # 4. Save Scores
 with open(OUT_FILE, "w") as f:
