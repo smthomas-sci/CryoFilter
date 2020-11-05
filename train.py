@@ -14,7 +14,7 @@ import os
 import tensorflow as tf
 
 from cryofilter.data import DataGenerator
-from cryofilter.model import build_model
+from cryofilter.model import build_model, straight_through_model
 
 
 parser = argparse.ArgumentParser(description='Train network')
@@ -38,12 +38,14 @@ parser.add_argument('--augmentation', type=bool, default=True,
                     help='Using data augmentation- default is True')
 parser.add_argument('--history_dir', type=str, default=".",
                     help='Diretory to save history.csv')
+parser.add_argument('--model', type=str, default="roberts",
+                    help='The model type to use. e.g. "straight" or "roberts" ')
 
 args = parser.parse_args()
 
 # # --------------------- DEBUG -------------------------------------- #
-#physical_devices = tf.config.list_physical_devices('GPU')
-#tf.config.experimental.set_memory_growth(physical_devices[0], True)
+physical_devices = tf.config.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 # # ----------------------------------------------------------------- #
 
 
@@ -57,6 +59,7 @@ HISTORY_DIR = args.history_dir
 POS_FILES = args.pos
 NEG_FILES = args.neg
 AUGMENTATION = args.augmentation
+MODEL = args.model
 
 # 1. Setup data
 generator = DataGenerator(pos_files=POS_FILES,
@@ -64,14 +67,19 @@ generator = DataGenerator(pos_files=POS_FILES,
                           batch_size=BATCH_SIZE,
                           split=SPLIT,
                           img_dim=IMG_DIM,
-                          data_augmentation=AUGMENTATION
+                          data_augmentation=AUGMENTATION,
                           )
 
 # 2. Build and prepare model for training
 Acc = tf.keras.metrics.BinaryAccuracy()
 Loss = tf.keras.losses.BinaryCrossentropy()
 
-model = build_model(img_dim=IMG_DIM)
+if MODEL == "straight":
+    model = straight_through_model(img_dim=IMG_DIM)
+else:
+    # Roberts
+    model = build_model(img_dim=IMG_DIM)
+
 model.compile(optimizer=tf.keras.optimizers.Adam(lr=LEARNING_RATE),
               loss="binary_crossentropy",
               metrics=[Acc])

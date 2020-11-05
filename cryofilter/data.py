@@ -45,7 +45,8 @@ class DataGenerator:
                  shuffle: bool = True,
                  data_augmentation: bool = True,
                  split: float = 0.7,
-                 img_dim: int = 28
+                 img_dim: int = 28,
+                 reshape: bool = False
                  ):
         """
         :param pos_files: a list of mrcs files for the positive class
@@ -153,9 +154,6 @@ class DataGenerator:
         batch_img = self.normalise(np.stack(batch_img))
         batch_rob = self.normalise(np.stack(batch_rob))
         batch_label = np.stack(batch_label).reshape(len(batch_label), 1)
-
-        # Convert to tensors
-        # batch_img = tf.convert_to_tensor(batch_img)
 
         return batch_img, batch_rob, batch_label
 
