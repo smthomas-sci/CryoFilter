@@ -15,7 +15,7 @@ import argparse
 import tensorflow as tf
 
 from cryofilter.data import DataGenerator
-from cryofilter.model import build_model
+from cryofilter.model import build_model, straight_through_model
 from cryofilter.utils import get_predictions, create_roc_plot, compute_metrics
 
 
@@ -36,6 +36,9 @@ parser.add_argument('--img_dim', type=int, default=28,
                     help='The size to resize to e.g. 256x256 -> 28x28. Larger is more computation')
 parser.add_argument('--tta', type=bool, default=False,
                     help='Whether to use Test-Time Augmentation when evaluating the model')
+parser.add_argument('--model', type=str, default="roberts",
+                    help='The model type to use. e.g. "straight" or "roberts" ')
+
 args = parser.parse_args()
 
 
@@ -52,6 +55,7 @@ OUT_DIR = args.out_dir
 POS_FILES = args.pos
 NEG_FILES = args.neg
 TTA = args.tta
+MODEL = args.model
 
 # 1. Setup data
 generator = DataGenerator(pos_files=POS_FILES,
@@ -63,7 +67,12 @@ generator = DataGenerator(pos_files=POS_FILES,
                           )
 
 # 2. Prepare Model
-model = build_model(IMG_DIM)
+if MODEL == "straight":
+    model = straight_through_model(img_dim=IMG_DIM)
+else:
+    # Roberts
+    model = build_model(img_dim=IMG_DIM)
+
 model.load_weights(WEIGHTS)
 
 # 3. Get predictions

@@ -40,6 +40,8 @@ optional arguments:
                         Using data augmentation- default is True
   --history_dir HISTORY_DIR
                         Diretory to save history.csv
+  --model MODEL
+                        
 
 ```
 
@@ -51,7 +53,7 @@ python train.py --pos ./data/pos.mrcs ./data/pos_top.mrcs --neg ./data/neg.mrcs 
 To select the best model which minimises **over-fitting**, select the weights where the validation
 accuracy is at its highest before it stops improving. This model can be used for later prediction.
 During training, the only metrics monitored are `train_loss`, `train_acc`, `val_loss` and `val_acc`.
-At the end of training they will be saved in the `history.csv` written to the `--histor_dir` directory.
+At the end of training they will be saved in the `history.csv` written to the `--history_dir` directory.
 
 The model can be evaluated more thoroughly using the `metrics.py` script. You can point it to a mrc
 and provide and output directory and weights. It will produce an AUC statistic and save the ROC and Confusion
@@ -61,6 +63,7 @@ Matrix plots in the output directory.
 usage: metrics.py [-h] [--pos POS [POS ...]] [--neg NEG [NEG ...]]
                   [--weights WEIGHTS] [--out_dir OUT_DIR] [--split SPLIT]
                   [--batch_size BATCH_SIZE] [--img_dim IMG_DIM] [--tta TTA]
+                  [--model MODEL]
 
 Evaluate network
 
@@ -79,6 +82,8 @@ optional arguments:
                         more computation
   --tta TTA             Whether to use Test-Time Augmentation when evaluating
                         the model
+  --model MODEL         The model type to use. e.g. "straight" or "roberts"
+
 ```
 
 Usage is:
@@ -131,6 +136,10 @@ python score.py --mrc ./data/neg.mrcs --out_file ./output/neg_scores.csv --weigh
 4, 0.047
 ...
 ```
+
+There is also the option to extract features from the model which can be saved as
+a numpy array. This just needs to be used with the `--features True` argument, as
+well as changing the `--out_file` to something like `features.npy`. The output shape will be `(N, 64)`.
 
 
  

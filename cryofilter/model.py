@@ -40,19 +40,26 @@ def build_model(img_dim: int = 28, dropout=False):
     x = AveragePooling2D()(x)
     feat2 = Flatten()(x)
 
-    x = Concatenate()([feat1, feat2])
+    feat_both = Concatenate(name="features")([feat1, feat2])
+
+    x = feat_both
 
     if dropout:
         x = Dropout(0.8)(x)
 
     model_output = Dense(1, activation="sigmoid")(x)
 
+    model_outputs = [model_output]
+
     return Model(inputs=[model_input_1, model_input_2],
-                 outputs=[model_output],
+                 outputs=model_outputs,
                  name="classifier")
 
 
 def straight_through_model(img_dim, dropout=False):
+    # Dummy used to simplify generator logic
+    dummy_input = Input(shape=(img_dim, img_dim, 1), name="dummy_in")
+    # real model
     model_input = Input(shape=(img_dim, img_dim, 1), name="image_in")
     x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(model_input)
     x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
@@ -66,16 +73,21 @@ def straight_through_model(img_dim, dropout=False):
     x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
     x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
     x = AveragePooling2D()(x)
-    x = Flatten()(x)
+    feat = Flatten(name="features")(x)
+
+    x = feat
 
     if dropout:
         x = Dropout(dropout)(x)
 
     model_output = Dense(1, activation="sigmoid")(x)
 
-    return Model(inputs=[model_input],
-                 outputs=[model_output],
+    model_outputs = [model_output]
+
+    return Model(inputs=[model_input, dummy_input],
+                 outputs=model_outputs,
                  name="straight_classifier")
+
 
 if __name__ == "__main__":
 

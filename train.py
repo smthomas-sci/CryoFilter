@@ -44,8 +44,8 @@ parser.add_argument('--model', type=str, default="roberts",
 args = parser.parse_args()
 
 # # --------------------- DEBUG -------------------------------------- #
-physical_devices = tf.config.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+# physical_devices = tf.config.list_physical_devices('GPU')
+# tf.config.experimental.set_memory_growth(physical_devices[0], True)
 # # ----------------------------------------------------------------- #
 
 
@@ -132,7 +132,7 @@ filename = os.path.join(HISTORY_DIR, "cryofilter/history.csv")
 print("Saving history at:", filename)
 print("-------------------- HISTORY -----------------")
 with open(filename, "w") as f:
-    line = ",".join(["-"] + list(history.keys())) + "\n"
+    line = ",".join(["epoch"] + list(history.keys())) + "\n"
     f.write(line)
     print(line)
 
