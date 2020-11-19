@@ -12,12 +12,6 @@
 The default parameters for training are reasonable and it may not be that necessary to fine-tune the network.
 
 ```bash
-usage: train.py [-h] [--pos POS [POS ...]] [--neg NEG [NEG ...]]
-                [--weight_dir WEIGHT_DIR] [--batch_size BATCH_SIZE]
-                [--split SPLIT] [--epochs EPOCHS] [--img_dim IMG_DIM]
-                [--learning_rate LEARNING_RATE] [--augmentation AUGMENTATION]
-                [--history_dir HISTORY_DIR]
-
 Train network
 
 optional arguments:
@@ -29,8 +23,7 @@ optional arguments:
   --batch_size BATCH_SIZE
                         Number of images to train at once - between 12 and 128
                         is fine
-  --split SPLIT         Train : Validation split - (1-split) will be shared
-                        for between validation, test
+  --split SPLIT         Train : Validation split
   --epochs EPOCHS       Number of times to train on the whole dataset
   --img_dim IMG_DIM     The size to resize to e.g. 256x256 -> 28x28. Larger is
                         more computation
@@ -39,9 +32,9 @@ optional arguments:
   --augmentation AUGMENTATION
                         Using data augmentation- default is True
   --history_dir HISTORY_DIR
-                        Diretory to save history.csv
-  --model MODEL
-                        
+                        Directory to save history.csv
+  --model MODEL         The model type to use. e.g. "straight" or "roberts"
+  --f F                 Number of filters in model. default = 32
 
 ```
 
@@ -60,11 +53,6 @@ and provide and output directory and weights. It will produce an AUC statistic a
 Matrix plots in the output directory.
 
 ```
-usage: metrics.py [-h] [--pos POS [POS ...]] [--neg NEG [NEG ...]]
-                  [--weights WEIGHTS] [--out_dir OUT_DIR] [--split SPLIT]
-                  [--batch_size BATCH_SIZE] [--img_dim IMG_DIM] [--tta TTA]
-                  [--model MODEL]
-
 Evaluate network
 
 optional arguments:
@@ -83,6 +71,7 @@ optional arguments:
   --tta TTA             Whether to use Test-Time Augmentation when evaluating
                         the model
   --model MODEL         The model type to use. e.g. "straight" or "roberts"
+  --f F                 Number of filters in model. default = 32
 
 ```
 
@@ -115,8 +104,31 @@ Saving figure: ./output/roc.png
 # Prediction
 
 Prediction in the wild is done using `score.py` with an output of a score between
- 0-1 for each image, in the order found in the stack. The scores are saved as a
- csv file, saved as `--out_file [*.csv]`. You can additionally use the --tta argument
+ 0-1 for each image, in the order found in the stack. 
+ 
+```
+Score mrc file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --mrc MRC [MRC ...]   mrcs files to score
+  --weights WEIGHTS     Path to the model weights
+  --out_file OUT_FILE   full path and file name (include ".csv") to save
+                        scores
+  --batch_size BATCH_SIZE
+                        Number of images to train at once - between 12 and 128
+                        is fine
+  --img_dim IMG_DIM     The size to resize to e.g. 256x256 -> 28x28. Larger is
+                        more computation
+  --tta TTA             Whether to use Test-Time Augmentation when evaluating
+                        the model
+  --features FEATURES   Instead of predicting, save features.
+  --model MODEL         The model type to use. e.g. "straight" or "roberts"
+  --f F                 Number of filters in model. default = 32
+
+```
+ 
+ The scores are saved as a csv file, saved as `--out_file [*.csv]`. You can additionally use the --tta argument
  which will included [test-time augmentation](https://www.nature.com/articles/s41598-020-61808-3).
  This performances left/right flips and 90°, 180°, 270° rotations for each *individual* image,
  and then takes the mean prediction. This can boost performance but predicts each images 8 times, and thus requires
@@ -141,9 +153,4 @@ There is also the option to extract features from the model which can be saved a
 a numpy array. This just needs to be used with the `--features True` argument, as
 well as changing the `--out_file` to something like `features.npy`. The output shape will be `(N, 64)`.
 
-
- 
- 
- 
- 
 

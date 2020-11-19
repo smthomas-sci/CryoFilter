@@ -176,7 +176,7 @@ def create_roc_plot(metrics, out_dir: str):
 
     # Plot the roc curve for the model
     plt.figure(figsize=(5, 5), dpi=200)
-    plt.plot(base_fpr, base_tpr, linestyle='--', label='Reference')
+    plt.plot(base_fpr, base_tpr, linestyle='--', label='Reference', color="black")
     plt.plot(train_fpr, train_tpr, marker='.', label='Model')
 
     # Axis labels

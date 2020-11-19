@@ -37,6 +37,8 @@ parser.add_argument('--features', type=bool, default=False,
                     help='Instead of predicting, save features.')
 parser.add_argument('--model', type=str, default="roberts",
                     help='The model type to use. e.g. "straight" or "roberts" ')
+parser.add_argument('--f', type=int, default=32,
+                    help='Number of filters in model. default = 32')
 
 args = parser.parse_args()
 
@@ -54,6 +56,7 @@ MRC_FILE = args.mrc
 TTA = args.tta
 FEAT = args.features
 MODEL = args.model
+F = args.f
 
 # 1. Setup data
 generator = DataGenerator(pos_files=MRC_FILE,
@@ -67,10 +70,10 @@ generator = DataGenerator(pos_files=MRC_FILE,
 
 # 2. Prepare Model
 if MODEL == "straight":
-    model = straight_through_model(img_dim=IMG_DIM)
+    model = straight_through_model(img_dim=IMG_DIM, f=F)
 else:
     # Roberts
-    model = build_model(img_dim=IMG_DIM)
+    model = build_model(img_dim=IMG_DIM, f=F)
 
 model.load_weights(WEIGHTS)
 

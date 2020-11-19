@@ -38,6 +38,8 @@ parser.add_argument('--tta', type=bool, default=False,
                     help='Whether to use Test-Time Augmentation when evaluating the model')
 parser.add_argument('--model', type=str, default="roberts",
                     help='The model type to use. e.g. "straight" or "roberts" ')
+parser.add_argument('--f', type=int, default=32,
+                    help='Number of filters in model. default = 32')
 
 args = parser.parse_args()
 
@@ -56,6 +58,7 @@ POS_FILES = args.pos
 NEG_FILES = args.neg
 TTA = args.tta
 MODEL = args.model
+F = args.f
 
 # 1. Setup data
 generator = DataGenerator(pos_files=POS_FILES,
@@ -68,10 +71,10 @@ generator = DataGenerator(pos_files=POS_FILES,
 
 # 2. Prepare Model
 if MODEL == "straight":
-    model = straight_through_model(img_dim=IMG_DIM)
+    model = straight_through_model(img_dim=IMG_DIM, f=F)
 else:
     # Roberts
-    model = build_model(img_dim=IMG_DIM)
+    model = build_model(img_dim=IMG_DIM, f=F)
 
 model.load_weights(WEIGHTS)
 

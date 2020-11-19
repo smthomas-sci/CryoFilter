@@ -37,9 +37,11 @@ parser.add_argument('--learning_rate', type=float, default=0.001,
 parser.add_argument('--augmentation', type=bool, default=True,
                     help='Using data augmentation- default is True')
 parser.add_argument('--history_dir', type=str, default=".",
-                    help='Diretory to save history.csv')
+                    help='Directory to save history.csv')
 parser.add_argument('--model', type=str, default="roberts",
                     help='The model type to use. e.g. "straight" or "roberts" ')
+parser.add_argument('--f', type=int, default=32,
+                    help='Number of filters in model. default = 32')
 
 args = parser.parse_args()
 
@@ -60,6 +62,7 @@ POS_FILES = args.pos
 NEG_FILES = args.neg
 AUGMENTATION = args.augmentation
 MODEL = args.model
+F = args.f
 
 # 1. Setup data
 generator = DataGenerator(pos_files=POS_FILES,
@@ -75,10 +78,10 @@ Acc = tf.keras.metrics.BinaryAccuracy()
 Loss = tf.keras.losses.BinaryCrossentropy()
 
 if MODEL == "straight":
-    model = straight_through_model(img_dim=IMG_DIM)
+    model = straight_through_model(img_dim=IMG_DIM, f=F)
 else:
     # Roberts
-    model = build_model(img_dim=IMG_DIM)
+    model = build_model(img_dim=IMG_DIM, f=F)
 
 model.compile(optimizer=tf.keras.optimizers.Adam(lr=LEARNING_RATE),
               loss="binary_crossentropy",
@@ -128,7 +131,7 @@ for epoch in range(EPOCHS):
     print()
 
 # EPOCH END
-filename = os.path.join(HISTORY_DIR, "cryofilter/history.csv")
+filename = os.path.join(HISTORY_DIR, "history.csv")
 print("Saving history at:", filename)
 print("-------------------- HISTORY -----------------")
 with open(filename, "w") as f:

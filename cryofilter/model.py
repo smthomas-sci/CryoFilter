@@ -14,29 +14,29 @@ from tensorflow.keras.layers import GlobalAveragePooling2D
 from tensorflow.keras.models import Model
 
 
-def build_model(img_dim: int = 28, dropout=False):
+def build_model(img_dim: int = 28, dropout=False, f=32):
 
     model_input_1 = Input(shape=(img_dim, img_dim, 1), name="image_in")
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(model_input_1)
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(model_input_1)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
     x = AveragePooling2D()(x)
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(x)
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
     x = AveragePooling2D()(x)
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(x)
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
     x = AveragePooling2D()(x)
     feat1 = Flatten()(x)
 
     model_input_2 = Input(shape=(img_dim, img_dim, 1), name="robert_in")
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(model_input_2)
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(model_input_2)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
     x = AveragePooling2D()(x)
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(x)
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
     x = AveragePooling2D()(x)
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(x)
-    x = Conv2D(32, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
     x = AveragePooling2D()(x)
     feat2 = Flatten()(x)
 
@@ -56,22 +56,19 @@ def build_model(img_dim: int = 28, dropout=False):
                  name="classifier")
 
 
-def straight_through_model(img_dim, dropout=False):
+def straight_through_model(img_dim, dropout=False, f=64):
     # Dummy used to simplify generator logic
     dummy_input = Input(shape=(img_dim, img_dim, 1), name="dummy_in")
     # real model
     model_input = Input(shape=(img_dim, img_dim, 1), name="image_in")
-    x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(model_input)
-    x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(model_input)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
     x = AveragePooling2D()(x)
-    x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
-    x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
     x = AveragePooling2D()(x)
-    x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
-    x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
-    x = AveragePooling2D()(x)
-    x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
-    x = Conv2D(64, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
+    x = Conv2D(f, 3, activation="relu", strides=1, padding="same")(x)
     x = AveragePooling2D()(x)
     feat = Flatten(name="features")(x)
 
