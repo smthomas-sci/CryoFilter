@@ -151,6 +151,6 @@ python score.py --mrc ./data/neg.mrcs --out_file ./output/neg_scores.csv --weigh
 
 There is also the option to extract features from the model which can be saved as
 a numpy array. This just needs to be used with the `--features True` argument, as
-well as changing the `--out_file` to something like `features.npy`. The output shape will be `(N, 64)`.
+well as changing the `--out_file` to something like `features.npy`. The output shape will be `(N, F)`.
 
 
